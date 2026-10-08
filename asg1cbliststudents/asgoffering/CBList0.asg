@@ -1,0 +1,243 @@
+asg CBList {
+    adt = CBList
+    impl = CharArrayCBList
+    
+     /**
+     * Adds the value c to the list at the current position. The cursor position
+     * is not changed. If there is no space to add, do not add.
+     * 
+     * @param c
+     *            value to add
+     */
+    group add {
+        tests State {
+            addToZeroList: <|>.add('a') -> <|a>
+            addToOneList: <a|>.add('b') -> <a,|b>
+            addToThreeList: <a,b,c|>.add('d') -> <a,b,c|d>
+        }
+        tests exception {
+            addToFullList: <a|b,c,d,e>.add('f') !! IllegalArgumentException
+        }
+    }
+    
+    /**
+     * Returns an array of the contents of the list. The array elements must
+     * occur in the same order as they do in the list. The array length must be
+     * the same as the number of elements in the list.
+     * 
+     * @return array of elements
+     */
+    group asArray {
+        tests Value {
+            /** @let char[] x = { } */
+            emptyList: <|>.asArray() == x
+            /** @let char[] x = {'a'} */
+            oneList: <|a>.asArray() == x
+            /** @let char[] x = {'a', 'b', 'c'} */
+            threelist: <|a,b,c>.asArray() == x
+        }
+//        tests exception {
+//            /** @let char[] x = {a,b,c} */
+//            fiveDifLen: <|a,b,c,d,e>.asArray() !! IllegalArgumentException
+//        }
+    }
+    
+     /**
+     * <p>
+     * Returns true if the two CBLists are equal. Note that o can't be null,
+     * must be a CBList implementation, all corresponding elements must be
+     * equal, and the cursor must be in the same position.
+     * </p>
+     * <h2>DO NOT USE toString() in your implementation of this method</h2>
+     * 
+     * @param o
+     *            object to compare.
+     * @return true if equal, false else
+     */
+    group equals {
+        tests ValueTrue{
+             /** @let CBList o = <> */
+            sameList: <>.equals(o) == true
+            /** @let CBList x = <> */
+            emptyList: <>.equals(x) == true
+            /** @let CBList x = <|a> */
+            oneList: <|a>.equals(x) == true
+            /** @let CBList x = <|a,b,c,d,e> */
+            fiveList: <|a,b,c,d,e>.equals(x) == true
+        }
+        tests ValueFalse {
+            /** @let CBList x = <|a,b,c> */
+            emptyList: <|>.equals(x) == false
+            /** @let CBList x = <|a,b,c> */
+            oneList: <|a>.equals(x) == false
+            /** @let CBList x = <|a,b,c> */
+            DifLen: <|a,b,c,d,e>.equals(x) == false
+            /** @let CBList x = <|a,b,c,d,f> */
+            DiffElt: <|a,b,c,d,e>.equals(x) == false
+            /** @let CBList x = <|a,b,c,d,f> */
+            Diffcurser: <a,b|c,d,e>.equals(x) == false
+            fiveNull: <|a,b,c,d,e>.equals(null) == false
+            NotList: <|a,b,c,d,e>.equals("not a list") == false
+        }
+    }
+    
+    /**
+     * Returns the current list item. It does not change the state of the list.
+     * 
+     * @return current item
+     * @throws NoSuchElementException
+     *             if there is no current element
+     */
+    group get {
+        tests State {
+            noChange: <|a,b,c>.get() -> <|a,b,c>
+        }
+        tests Value {
+            getReturns: <a>.get() == 'a'
+            getReturnsatone: <|a,b,c,d,e>.get() == 'a'
+            getReturnsattwo: <a,b|c,d,e>.get() == 'c'
+            getReturnsatfour: <a,b,c,d|e>.get() == 'e'
+        }
+        tests Exception {
+            getempty: <|>.get() !! NoSuchElementException
+        }
+    }
+    
+    /**
+     * <p>
+     * Returns a CBList object whose state string is s. The format for s is
+     * described in the toString() method of this interface. While make(String)
+     * would be properly static, as it has no effect on state, for our present
+     * situation we will arbitrarily define it as an instance method.
+     * </p>
+     * <p>
+     * For example, if s was "&lt;a|b,c&gt;" then make would return a CBlist
+     * whose first element was 'a', second was 'b' and last was 'c'. In
+     * addition, the current element would be 'b'.
+     * </p>
+     * <p>
+     * You may assume that s will be a valid state string.
+     * </p>
+     * 
+     * @param s
+     *            state string of desired CBList
+     * @return CBList with state s
+     */
+    group make {
+        tests State{
+            example: ("&lt;a|b,c&gt;").make() -> <a|b,c> 
+            empty: ("&lt;|&gt;").make() -> <|>
+            one: ("&lt;a|&gt;").make() -> <a|>
+        }
+    }
+    
+    /**
+     * Moves the cursor to the next element. Note that the cursor can be moved
+     * to the position after the last element (in order to add an item after the
+     * last element).
+     * 
+     * @return true if cursor was moved else false
+     */
+    group next {
+        tests State{
+            empty: <|>.next() -> <|>
+            one: <|a>.next() -> <a|>
+            mult: <a,b|c,d>.next() -> <a,b,c|d>
+            multlast: <a,b|c>.next() -> <a,b,c|>
+        }
+    }
+    
+    /** 
+     * Returns the position of the cursor. The first element is at position 0.
+     * Note that the cursor can be at the position after the last element (see
+     * the Javadoc of method next()).
+     * 
+     * @return zero based cursor position
+     */
+    group pos {
+        tests Value{
+            empty: <|>.pos() == 0
+            oneatzero: <|a>.pos() == 0
+            twoatone: <a|b>.pos() == 1
+            fiveatthree: <a,b,c|d,e>.pos() == 3
+            fiveatfive: <a,b,c,d,e|>.pos() == 5
+        }
+    }
+    
+     /**
+     * Moves the cursor to the previous element.
+     * 
+     * @return true if cursor was moved else false
+     */
+    group prev {
+        tests State{
+            empty: <|>.prev() -> <|>
+            oneatzero: <|a>.prev() -> <|a>
+            oneatone: <a|>.prev() -> <|a>
+            fiveatthree: <a,b,c|d,e>.prev() -> <a,b|c,d,e>
+        }
+    }
+    
+    /**
+     * <p>
+     * Removes the current element from this CBList. The cursor position is not
+     * changed. No change is made if it is not possible to remove the current
+     * element.
+     * </p>
+     */
+    group remove {
+        tests State{
+            empty: <|>.remove() -> <|>
+            oneatzero: <|a>.remove() -> <|>
+            oneatone: <a|>.remove() -> <a|>
+            fiveatthree: <a,b,c|d,e>.remove() -> <a,b,c|e>
+        }
+    }
+    
+    /**
+     * Returns the number of elements in this list.
+     * 
+     * @return number of elements
+     */
+    group size {
+        tests Value {
+            empty: <|>.size() == 0
+            one: <|a>.size() == 1
+            five: <|a,b,c,d,e>.size() == 5
+        }
+        tests State {
+            empty: <|>.size() -> <|>
+            one: <|a>.size() -> <|a>
+            five: <|a,b,c,d,e>.size() -> <|a,b,c,d,e>
+        }
+    }
+    
+    /**
+     * <p>
+     * Returns the state string representation of this list. The state string
+     * starts with &lt;, followed by a comma separated sequence of the elements
+     * before the cursor, then a "|", followed by a comma separated sequence of
+     * elements after the cursor, ending with a &gt;. No spaces are included in
+     * this state string.
+     * </p>
+     * <p>
+     * For example, a list whose first element is 'a' followed by 'b', followed
+     * by 'c', and whose current element is b, would have a state string of
+     * "&lt;a|b,c&gt;". An empty list would have a state string of "&lt;|&gt;"
+     * </p>
+     * 
+     * @return state string
+     */
+    group toString {
+        tests State {
+            empty: <|>.toString() -> <|>
+            one: <|a>.toString() -> <|a>
+            five: <|a,b,c,d,e>.toString() -> <|a,b,c,d,e>
+        }
+        tests Value {
+            empty: <|>.toString() == "&lt;|&gt;"
+            one: <|a>.toString() == "&lt;|a&gt;"
+            five: <|a,b,c,d,e>.toString() == "&lt;|a,b,c,d,e&gt;"
+        }
+    }
+}
