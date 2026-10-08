@@ -1,0 +1,169 @@
+/**
+ * @author acsiochi
+ * @version 20240729
+ */
+asg RationalAsg {
+    adt = Rational
+    impl = IntRational
+
+    group add {
+        tests value {
+            /** @let r = <2,3>; @let p = <2,3> */
+            def: <0,1>.add(r) == p
+            /** @let r = <2,3>; @let p = <12,9> ;  */
+            twoThree: <2,3>.add(r) == p
+            /** @let i = <1,1>; @let e = <5,3> ; */
+            me: <2,3>.add(i) == e
+        }
+        tests state {
+            /** @let r = <2,3>;*/
+            def: <0,1>.add(r) -> <0,1>
+            /** @let r = <2,3>;*/
+            twoThree: <2,3>.add(r) -> <2,3>
+        }
+    }
+
+    group mult {
+        tests value {
+            /** @let r = <2,3>; @let p = <0,3> */
+            def: <0,1>.mult(r) == p
+            /** @let r = <2,3>; @let p = <4,9> ; really */
+            twoThree: <2,3>.mult(r) == p
+            /** @let i = <1,1>; @let e = <2,3> ; */
+            me: <2,3>.mult(i) == e
+        }
+        tests state {
+            /** @let r = <2,3>;*/
+            def: <0,1>.mult(r) -> <0,1>
+            /** @let r = <2,3>;*/
+            twoThree: <2,3>.mult(r) -> <2,3>
+        }
+    }
+
+    // public Rational setNum(int n);
+    group setNum {
+        tests state {
+            nTo3: <0,1>.setNum(3) -> <3,1>
+            nTo0: <0,1>.setNum(0) -> <0,1>
+        }
+        // return value is the original object, hence self
+        tests Value {
+            nTo3: <0,1>.setNum(3) == self
+            nSame: <0,1>.setNum(0) == self
+        }
+    }
+
+    /**
+     * Sets denominator to d.
+     * 
+     */
+//    public Rational setDen(int d);
+    group setDen {
+        tests State {
+            dTo3: <0,1>.setDen(3) -> <0,3>
+            dSame: <0,1>.setDen(1) -> <0,1>
+        }
+        tests Value {
+            dTo3: <0,1>.setDen(3) == self
+            dSame: <0,1>.setDen(1) == self
+        }
+        tests exception {
+            dTo0: <0,1>.setDen(0) !! IllegalArgumentException
+        }
+    }
+    /**
+     * Returns the numerator.
+     * 
+     */
+//    public int getNum();
+    group getNum {
+        tests value {
+            nIs0: <0,1>.getNum() == 0
+            nIs3: <3,1>.getNum() == 3
+        }
+        tests state {
+            nIs0: <0,1>.getNum() -> <0,1>
+            nIs3: <3,1>.getNum() -> <3,1>
+        }
+    }
+
+    /**
+     * Returns the denominator.
+     * 
+     */
+//    public int getDen();
+    group getDen {
+        tests value {
+            dIs1: <0,1>.getDen() == 1
+            dIs3: <0,3>.getDen() == 3
+        }
+        tests state {
+            dIs1: <0,1>.getDen() -> <0,1>
+            dIs3: <0,3>.getDen() -> <0,3>
+        }
+    }
+
+    /**
+     * Sets numerator and denominator of this Rational.
+     * 
+     */
+//    public Rational set(int n, int d);
+    group setIntInt {
+        tests state {
+            to2p3: <0,1>.set(2,3) -> <2,3>
+            nochange: <0,1>.set(0,1) -> <0,1>
+        }
+        tests value {
+            to2p3: <0,1>.set(2,3) == self
+            nochange: <0,1>.set(0,1) == self
+        }
+        tests exception {
+            dto0: <0,1>.set(1,0) !! IllegalArgumentException
+        }
+    }
+
+//    public Rational set(String state);
+    group setString {
+        tests state {
+            to2p3: <0,1>.set("<2,3>") -> <2,3>
+            nochange: <0,1>.set("<0,1>") -> <0,1>
+        }
+        tests value {
+            to2p3: <0,1>.set("<2,3>") == self
+            nochange: <0,1>.set("<0,1>") == self
+        }
+        tests exception {
+            dto0: <0,1>.set("<1,0>") !! IllegalArgumentException
+        }
+    }
+
+//    public String toString();
+    group toString {
+        tests value {
+            n0d1: <0,1>.toString() == "<0,1>"
+        }
+        tests state {
+            n0d1: <0,1>.toString() -> <0,1>
+        }
+    }
+
+//    public boolean equals(Object o);
+    group equals {
+        tests valueTrue {
+            /** @let x = <0,1> */
+            n0d1: <0,1>.equals(x) == true
+            // equal to self
+            me: <0,1>.equals(self) == true
+        }
+        tests valueFalse {
+            /** @let n = null; */
+            toNull: <0,1>.equals(n) == false
+            /** @let x = <1,1> */
+            diffNum: <0,1>.equals(x) == false
+            /** @let x = <0,2> */
+            diffDem: <0,1>.equals(x) == false
+            // not equal if not a Rational
+            notRat: <0,1>.equals("no") == false
+        }
+    }
+}
